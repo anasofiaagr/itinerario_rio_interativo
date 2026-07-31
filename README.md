@@ -70,9 +70,22 @@ npm test
 
 ## Publicar (GitHub Pages)
 
-O repositório já traz um workflow que publica no Pages a cada push na branch `main`.
-Basta habilitar **Settings → Pages → Source: GitHub Actions**. O `base` do Vite é
-ajustado automaticamente pelo workflow via `VITE_BASE`.
+Há um workflow pronto em `.github/workflows/deploy.yml` (no seu disco) que publica no
+Pages a cada push na `main`. Ele não foi enviado no push inicial porque o token do
+`gh` não tinha o escopo `workflow`. Para ativá-lo, uma vez:
+
+```bash
+gh auth refresh -h github.com -s workflow
+git rm --cached --ignore-unmatch .git/info/exclude >/dev/null 2>&1 || true
+git update-index --no-assume-unchanged .github/workflows/deploy.yml 2>/dev/null || true
+git add .github/workflows/deploy.yml
+git commit -m "Add GitHub Pages deploy workflow"
+git push
+```
+
+Depois, em **Settings → Pages → Source: GitHub Actions**. O `base` do Vite é ajustado
+automaticamente pelo workflow via `VITE_BASE`. (Ou adicione o arquivo pela interface
+web do GitHub, que não exige escopo extra.)
 
 ## Stack
 
