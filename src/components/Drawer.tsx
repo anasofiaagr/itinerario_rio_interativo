@@ -44,10 +44,14 @@ export default function Drawer(props: Props) {
   const route = day ? routes[day.id] : undefined
   const orderById = new Map<string, number>()
   const legById = new Map<string, number>()
+  const prevPointById = new Map<string, { lat: number; lng: number }>()
   gs.forEach((s, i) => {
     orderById.set(s.id, i + 1)
     if (i > 0 && route?.legsSec[i - 1] != null) legById.set(s.id, route.legsSec[i - 1])
+    if (i > 0) prevPointById.set(s.id, { lat: gs[i - 1].lat, lng: gs[i - 1].lng })
   })
+
+  const profileEmoji = { foot: '🚶', driving: '🚗', transit: '🚌' } as const
 
   function onDragEnd(e: DragEndEvent) {
     const { active: a, over } = e
@@ -82,10 +86,11 @@ export default function Drawer(props: Props) {
               {route ? (
                 <>
                   <span className="totals__main">
-                    {day.profile === 'foot' ? '🚶' : '🚗'} {formatDuration(route.totalSec)} ·{' '}
-                    {formatDistance(route.totalM)}
+                    {profileEmoji[day.profile]} {route.estimate ? '≈ ' : ''}
+                    {formatDuration(route.totalSec)} · {formatDistance(route.totalM)}
                   </span>
-                  {route.fallback && <span className="totals__warn">linha reta</span>}
+                  {route.estimate && <span className="totals__warn">aprox.</span>}
+                  {route.fallback && !route.estimate && <span className="totals__warn">linha reta</span>}
                 </>
               ) : (
                 <span className="totals__main">calculando rota…</span>
@@ -97,13 +102,19 @@ export default function Drawer(props: Props) {
                   className={day.profile === 'foot' ? 'on' : ''}
                   onClick={() => dispatch({ type: 'setProfile', dayId: day.id, profile: 'foot' })}
                 >
-                  🚶 a pé
+                  🚶
                 </button>
                 <button
                   className={day.profile === 'driving' ? 'on' : ''}
                   onClick={() => dispatch({ type: 'setProfile', dayId: day.id, profile: 'driving' })}
                 >
-                  🚗 carro
+                  🚗
+                </button>
+                <button
+                  className={day.profile === 'transit' ? 'on' : ''}
+                  onClick={() => dispatch({ type: 'setProfile', dayId: day.id, profile: 'transit' })}
+                >
+                  🚌
                 </button>
               </div>
               <button className="btn btn--sm" onClick={props.onOpenOptimize}>✨ Otimizar</button>
@@ -129,6 +140,7 @@ export default function Drawer(props: Props) {
                 legSec={legById.get(s.id)}
                 color={color}
                 selected={s.id === selectedStopId}
+                prevPoint={prevPointById.get(s.id)}
                 onSelect={() => props.onSelectStop(s.id)}
                 onEdit={() => props.onEditStop(s.id)}
               />

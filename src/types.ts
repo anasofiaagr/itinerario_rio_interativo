@@ -41,7 +41,7 @@ export interface Day {
   emoji: string
   /** cor do dia: dirige pin, rota e aba */
   color: string
-  profile: 'foot' | 'driving'
+  profile: 'foot' | 'driving' | 'transit'
   stops: Stop[]
 }
 

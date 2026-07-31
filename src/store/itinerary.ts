@@ -12,7 +12,7 @@ export type Action =
   | { type: 'reorder'; dayId: string; orderedIds: string[] }
   | { type: 'reorderPool'; orderedIds: string[] }
   | { type: 'move'; stopId: string; target: Target; index?: number }
-  | { type: 'setProfile'; dayId: string; profile: 'foot' | 'driving' }
+  | { type: 'setProfile'; dayId: string; profile: 'foot' | 'driving' | 'transit' }
   | { type: 'import'; itinerary: Itinerary }
   | { type: 'reset' }
 

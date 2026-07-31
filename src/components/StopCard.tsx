@@ -1,7 +1,10 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Stop } from '../types'
-import { formatDuration } from '../lib/geo'
+import type { LatLng } from '../lib/geo'
+import { formatDistance, formatDuration } from '../lib/geo'
+import { nearestMetro } from '../data/metro'
+import { googleMapsTransitUrl } from '../lib/maps'
 
 interface Props {
   stop: Stop
@@ -9,11 +12,21 @@ interface Props {
   legSec?: number
   color: string
   selected: boolean
+  prevPoint?: LatLng
   onSelect: () => void
   onEdit: () => void
 }
 
-export default function StopCard({ stop, order, legSec, color, selected, onSelect, onEdit }: Props) {
+export default function StopCard({
+  stop,
+  order,
+  legSec,
+  color,
+  selected,
+  prevPoint,
+  onSelect,
+  onEdit,
+}: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: stop.id,
   })
@@ -25,7 +38,19 @@ export default function StopCard({ stop, order, legSec, color, selected, onSelec
     borderLeftColor: color,
   }
 
-  const agenda = typeof stop.lat !== 'number'
+  const hasCoords = typeof stop.lat === 'number' && typeof stop.lng === 'number'
+  const agenda = !hasCoords
+
+  // Estação de metrô mais próxima (só útil se estiver razoavelmente perto)
+  const metro = hasCoords ? nearestMetro({ lat: stop.lat!, lng: stop.lng! }) : null
+  const metroClose = metro && metro.distanceM < 2500
+  const stationShort = metro ? metro.station.name.split(' / ')[0] : ''
+
+  function openTransit() {
+    if (!hasCoords) return
+    const url = googleMapsTransitUrl({ lat: stop.lat!, lng: stop.lng! }, prevPoint)
+    window.open(url, '_blank', 'noopener')
+  }
 
   return (
     <div ref={setNodeRef} style={style} className={`card ${selected ? 'card--selected' : ''}`}>
@@ -47,12 +72,27 @@ export default function StopCard({ stop, order, legSec, color, selected, onSelec
             {legSec != null && legSec > 0 && (
               <span className="chip chip--leg">🚶 {formatDuration(legSec)} até aqui</span>
             )}
+            {metroClose && (
+              <span className="chip chip--metro">Ⓜ️ {stationShort} · {formatDistance(metro!.distanceM)}</span>
+            )}
           </div>
           {stop.notes && <div className="card__notes">{stop.notes}</div>}
           {stop.unavailableNote && <div className="card__warn">⚠️ {stop.unavailableNote}</div>}
         </button>
 
-        <button className="card__edit" onClick={onEdit} aria-label="Editar">✎</button>
+        <div className="card__side">
+          {hasCoords && (
+            <button
+              className="card__transit"
+              onClick={openTransit}
+              aria-label="Como chegar de transporte público"
+              title="Rota de transporte público (Google Maps)"
+            >
+              🚌
+            </button>
+          )}
+          <button className="card__edit" onClick={onEdit} aria-label="Editar">✎</button>
+        </div>
       </div>
     </div>
   )

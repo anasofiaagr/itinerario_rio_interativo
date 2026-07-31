@@ -318,12 +318,24 @@ input, select {
 .card__meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
 .card__notes { font-size: 12.5px; color: var(--ink-soft); margin-top: 5px; }
 .card__warn { font-size: 12.5px; color: var(--danger); margin-top: 5px; font-weight: 600; }
-.card__edit {
-  width: 46px;
-  font-size: 18px;
-  color: var(--ink-soft);
+.card__side {
+  display: flex;
+  flex-direction: column;
   border-left: 1px solid var(--line);
 }
+.card__transit, .card__edit {
+  width: 48px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+}
+.card__transit {
+  font-size: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.card__edit { font-size: 18px; }
 
 .chip {
   font-size: 12px;
@@ -335,6 +347,7 @@ input, select {
 }
 .chip--ghost { background: transparent; border: 1px dashed var(--line); }
 .chip--leg { background: color-mix(in srgb, var(--accent-2) 22%, #fff); color: #7a4a10; }
+.chip--metro { background: color-mix(in srgb, #2f6fd0 15%, #fff); color: #244f97; }
 
 /* ---------- edit panel ---------- */
 .edit {

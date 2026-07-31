@@ -1,30 +1,45 @@
 // Rotas reais via OSRM (servidores públicos de demonstração do FOSSGIS, que
-// suportam os perfis a pé e de carro). Toda falha degrada para linha reta
-// (haversine) para não quebrar a tela.
+// suportam a pé e de carro). Toda falha degrada para linha reta (haversine) para
+// não quebrar a tela.
+//
+// Transporte público: o OSRM não roteia ônibus/metrô. O perfil 'transit' é uma
+// ESTIMATIVA — parte do tempo de carro, multiplicado por um fator e somado a uma
+// espera por trecho — e vem sempre marcado como aproximado (`estimate: true`).
+// Para a rota real de transporte público, o app abre o Google Maps.
 import { haversineMeters, type LatLng } from '../lib/geo'
 
-export type Profile = 'foot' | 'driving'
+export type Profile = 'foot' | 'driving' | 'transit'
 
 // Velocidades para o fallback em linha reta (m/s)
 const FALLBACK_SPEED: Record<Profile, number> = {
   foot: 1.35, // ~4,9 km/h
-  driving: 8.3, // ~30 km/h (trânsito urbano)
+  driving: 8.3, // ~30 km/h
+  transit: 6.0, // ~21 km/h efetivos (com paradas)
 }
 
-const BASE: Record<Profile, string> = {
+const BASE: Record<'foot' | 'driving', string> = {
   foot: 'https://routing.openstreetmap.de/routed-foot',
   driving: 'https://routing.openstreetmap.de/routed-car',
 }
 
+// Estimativa de transporte público
+const TRANSIT_FACTOR = 1.6 // ônibus/metrô costuma ser mais lento que o carro
+const TRANSIT_WAIT_SEC = 300 // ~5 min de espera/baldeação por trecho
+
+/** Perfil OSRM real usado para buscar geometria/tempos (transit usa o de carro). */
+function osrmProfile(p: Profile): 'foot' | 'driving' {
+  return p === 'transit' ? 'driving' : p
+}
+
 export interface RouteResult {
-  /** polilinha [lat, lng] para desenhar */
   coords: [number, number][]
-  /** duração de cada trecho (entre paradas consecutivas), em segundos */
   legsSec: number[]
   totalSec: number
   totalM: number
-  /** true se caiu no fallback de linha reta */
+  /** caiu no fallback de linha reta */
   fallback: boolean
+  /** os tempos são estimativa (perfil transporte público) */
+  estimate: boolean
 }
 
 function coordsParam(points: LatLng[]): string {
@@ -33,12 +48,13 @@ function coordsParam(points: LatLng[]): string {
 
 function straightLineFallback(points: LatLng[], profile: Profile): RouteResult {
   const speed = FALLBACK_SPEED[profile]
+  const wait = profile === 'transit' ? TRANSIT_WAIT_SEC : 0
   const legsSec: number[] = []
   let totalM = 0
   for (let i = 0; i < points.length - 1; i++) {
     const d = haversineMeters(points[i], points[i + 1])
     totalM += d
-    legsSec.push(d / speed)
+    legsSec.push(d / speed + wait)
   }
   return {
     coords: points.map((p) => [p.lat, p.lng]),
@@ -46,17 +62,18 @@ function straightLineFallback(points: LatLng[], profile: Profile): RouteResult {
     totalSec: legsSec.reduce((a, b) => a + b, 0),
     totalM,
     fallback: true,
+    estimate: profile === 'transit',
   }
 }
 
 /** Rota passando por todos os pontos, na ordem dada. Nunca lança. */
 export async function routeThrough(points: LatLng[], profile: Profile): Promise<RouteResult> {
   if (points.length < 2) {
-    return { coords: points.map((p) => [p.lat, p.lng]), legsSec: [], totalSec: 0, totalM: 0, fallback: false }
+    return { coords: points.map((p) => [p.lat, p.lng]), legsSec: [], totalSec: 0, totalM: 0, fallback: false, estimate: profile === 'transit' }
   }
+  const op = osrmProfile(profile)
   const url =
-    `${BASE[profile]}/route/v1/${profile}/${coordsParam(points)}` +
-    '?overview=full&geometries=geojson&steps=false'
+    `${BASE[op]}/route/v1/${op}/${coordsParam(points)}` + '?overview=full&geometries=geojson&steps=false'
   try {
     const res = await fetch(url)
     if (!res.ok) return straightLineFallback(points, profile)
@@ -66,14 +83,13 @@ export async function routeThrough(points: LatLng[], profile: Profile): Promise<
     const coords: [number, number][] = (route.geometry.coordinates as [number, number][]).map(
       ([lng, lat]) => [lat, lng],
     )
-    const legsSec: number[] = (route.legs as Array<{ duration: number }>).map((l) => l.duration)
-    return {
-      coords,
-      legsSec,
-      totalSec: route.duration,
-      totalM: route.distance,
-      fallback: false,
+    let legsSec: number[] = (route.legs as Array<{ duration: number }>).map((l) => l.duration)
+    let totalSec: number = route.duration
+    if (profile === 'transit') {
+      legsSec = legsSec.map((s) => s * TRANSIT_FACTOR + TRANSIT_WAIT_SEC)
+      totalSec = legsSec.reduce((a, b) => a + b, 0)
     }
+    return { coords, legsSec, totalSec, totalM: route.distance, fallback: false, estimate: profile === 'transit' }
   } catch {
     return straightLineFallback(points, profile)
   }
@@ -82,23 +98,25 @@ export async function routeThrough(points: LatLng[], profile: Profile): Promise<
 /** Matriz de durações (segundos) entre todos os pontos. Fallback haversine. */
 export async function durationMatrix(points: LatLng[], profile: Profile): Promise<number[][]> {
   const n = points.length
+  const scale = (v: number, i: number, j: number) =>
+    profile === 'transit' && i !== j ? v * TRANSIT_FACTOR + TRANSIT_WAIT_SEC : v
   const fallback = (): number[][] => {
     const speed = FALLBACK_SPEED[profile]
-    return points.map((a) => points.map((b) => haversineMeters(a, b) / speed))
+    return points.map((a, i) => points.map((b, j) => scale(haversineMeters(a, b) / speed, i, j)))
   }
   if (n < 2) return fallback()
 
-  const url = `${BASE[profile]}/table/v1/${profile}/${coordsParam(points)}?annotations=duration`
+  const op = osrmProfile(profile)
+  const url = `${BASE[op]}/table/v1/${op}/${coordsParam(points)}?annotations=duration`
   try {
     const res = await fetch(url)
     if (!res.ok) return fallback()
     const data = await res.json()
     if (data.code !== 'Ok' || !Array.isArray(data.durations)) return fallback()
     const m = data.durations as (number | null)[][]
-    // OSRM pode devolver null para pares inalcançáveis: troca por haversine
     const speed = FALLBACK_SPEED[profile]
     return m.map((row, i) =>
-      row.map((v, j) => (v == null ? haversineMeters(points[i], points[j]) / speed : v)),
+      row.map((v, j) => scale(v == null ? haversineMeters(points[i], points[j]) / speed : v, i, j)),
     )
   } catch {
     return fallback()

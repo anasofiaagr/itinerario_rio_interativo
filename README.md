@@ -30,8 +30,13 @@ O terminal mostra um endereço `http://localhost:5199` e também um endereço de
 - 📌 **Abas por dia** num painel de baixo; cards arrastáveis (segure o emoji e arraste).
   Tocar num card centraliza o mapa e abre o balão do pin.
 - 🔀 Filtro **“Dia atual”** × **“Viagem toda”**.
-- 🚶🚗 **Rota real** entre as paradas (via OSRM), com tempo/distância totais e o tempo
-  de cada trecho no card. Alterne **a pé / carro** por dia.
+- 🚶🚗🚌 **Rota real** entre as paradas (via OSRM), com tempo/distância totais e o tempo
+  de cada trecho no card. Alterne **a pé / carro / transporte público** por dia.
+  - O **transporte público** é uma **estimativa** (marcada como “≈ aprox.”): o OSRM não
+    roteia ônibus/metrô. Para a rota real (linhas e horários), cada parada tem um botão
+    **🚌** que abre o **Google Maps** em modo transporte público.
+  - Cada parada mostra a **estação de metrô mais próxima** (Ⓜ️), com dados do OSM,
+    funcionando offline.
 - ✏️ **Editar tudo**: nome, emoji, horário, duração, categoria, travar, notas, mover
   entre dias ou pro **banco de ideias** 💡.
 - 🔎 **Buscar lugares novos** (Nominatim/OSM) e adicionar a um dia ou ao banco.
