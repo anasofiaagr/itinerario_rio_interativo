@@ -5,6 +5,7 @@ import type { LatLng } from '../lib/geo'
 import { formatDistance, formatDuration } from '../lib/geo'
 import { nearestMetro } from '../data/metro'
 import { googleMapsTransitUrl } from '../lib/maps'
+import { SAFETY_META } from '../data/palette'
 
 interface Props {
   stop: Stop
@@ -74,6 +75,14 @@ export default function StopCard({
             )}
             {metroClose && (
               <span className="chip chip--metro">Ⓜ️ {stationShort} · {formatDistance(metro!.distanceM)}</span>
+            )}
+            {stop.safety && (
+              <span
+                className="chip chip--safety"
+                style={{ ['--sf' as string]: SAFETY_META[stop.safety].color }}
+              >
+                {SAFETY_META[stop.safety].emoji} {SAFETY_META[stop.safety].label}
+              </span>
             )}
           </div>
           {stop.notes && <div className="card__notes">{stop.notes}</div>}

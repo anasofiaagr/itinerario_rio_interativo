@@ -348,6 +348,7 @@ input, select {
 .chip--ghost { background: transparent; border: 1px dashed var(--line); }
 .chip--leg { background: color-mix(in srgb, var(--accent-2) 22%, #fff); color: #7a4a10; }
 .chip--metro { background: color-mix(in srgb, #2f6fd0 15%, #fff); color: #244f97; }
+.chip--safety { background: color-mix(in srgb, var(--sf) 16%, #fff); color: var(--sf); }
 
 /* ---------- edit panel ---------- */
 .edit {
@@ -381,6 +382,35 @@ input, select {
 }
 .edit__move { display: flex; flex-direction: column; gap: 3px; }
 .edit__move > span { font-size: 11px; font-weight: 700; color: var(--ink-soft); }
+.edit__safety {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.edit__safety > span { font-size: 11px; font-weight: 700; color: var(--ink-soft); }
+.seg {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.seg button {
+  flex: 1 1 auto;
+  min-width: 64px;
+  padding: 9px 8px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.seg button.on {
+  background: color-mix(in srgb, var(--sf, var(--accent)) 14%, #fff);
+  color: var(--sf, var(--ink));
+}
+.edit__hint { font-size: 11px; color: var(--ink-soft); }
+
 .edit__delete {
   grid-column: 1 / -1;
   padding: 10px;

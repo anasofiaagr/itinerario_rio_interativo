@@ -1,5 +1,50 @@
-import type { Itinerary } from '../types'
+import type { Itinerary, SafetyLevel } from '../types'
 import { DAY_COLORS } from './palette'
+
+// Orientação de segurança GERAL e DIURNA por parada — não é nota minha nem dado
+// oficial; resume o que guias de viagem publicam (Zona Sul/Urca/Jardim Botânico
+// mais tranquilos; Centro/Lapa pedem atenção, sobretudo à noite/fim de semana;
+// praias isoladas da Zona Oeste melhor acompanhada). Totalmente editável no app.
+// Fontes no README. Itens só de agenda ficam sem nível.
+const SAFETY_BY_ID: Record<string, SafetyLevel> = {
+  'd0-santos-dumont': 'tranquilo',
+  'd0-base1': 'tranquilo',
+  'd1-cinema': 'tranquilo',
+  'd1-pontal': 'tranquilo',
+  'd2-saida': 'tranquilo',
+  'd2-mercadao': 'atencao',
+  'd2-trem': 'atencao',
+  'd2-senado': 'atencao',
+  'd2-lavradio': 'atencao',
+  'd2-aterro': 'atencao',
+  'd3-checkout': 'tranquilo',
+  'd3-base2': 'tranquilo',
+  'd3-jardim': 'tranquilo',
+  'd3-arpoador': 'tranquilo',
+  'd4-pracaxv': 'atencao',
+  'd4-amanha': 'tranquilo',
+  'd4-praiavermelha': 'tranquilo',
+  'd4-bondinho': 'tranquilo',
+  'd4-mureta': 'tranquilo',
+  'd4-galeao': 'tranquilo',
+  'pool-grumari': 'atencao',
+  'pool-prainha': 'atencao',
+  'pool-joatinga': 'atencao',
+  'pool-saoconrado': 'atencao',
+  'pool-mar': 'tranquilo',
+  'pool-mnba': 'atencao',
+  'pool-baile': 'atencao',
+  'pool-gloria': 'atencao',
+}
+
+function applySafety(it: Itinerary): void {
+  const tag = (s: { id: string; safety?: SafetyLevel }) => {
+    const lvl = SAFETY_BY_ID[s.id]
+    if (lvl) s.safety = lvl
+  }
+  it.days.forEach((d) => d.stops.forEach(tag))
+  it.pool.stops.forEach(tag)
+}
 
 // Coordenadas resolvidas e conferidas via Nominatim (OSM) durante o build.
 // Todas verificadas dentro do município do Rio de Janeiro. Itens genéricos
@@ -9,7 +54,7 @@ import { DAY_COLORS } from './palette'
 export const SEED_VERSION = 1
 
 export function makeSeed(): Itinerary {
-  return {
+  const it: Itinerary = {
     version: SEED_VERSION,
     days: [
       {
@@ -379,4 +424,6 @@ export function makeSeed(): Itinerary {
       ],
     },
   }
+  applySafety(it)
+  return it
 }

@@ -1,4 +1,4 @@
-import type { Category } from '../types'
+import type { Category, SafetyLevel } from '../types'
 
 /** Cores dos dias — paleta quente, cada dia com hue própria e contraste p/ texto branco. */
 export const DAY_COLORS: string[] = [
@@ -22,6 +22,14 @@ export const CATEGORY_EMOJI: Record<Category, string> = {
   casa: '🏠',
   noite: '🌙',
 }
+
+export const SAFETY_META: Record<SafetyLevel, { emoji: string; label: string; color: string }> = {
+  tranquilo: { emoji: '🟢', label: 'Tranquilo', color: '#3E8E7E' },
+  atencao: { emoji: '🟡', label: 'Atenção', color: '#C98A00' },
+  evitar: { emoji: '🔴', label: 'Evitar', color: '#C0392B' },
+}
+
+export const SAFETY_LEVELS = Object.keys(SAFETY_META) as SafetyLevel[]
 
 export const CATEGORY_LABEL: Record<Category, string> = {
   praia: 'Praia',

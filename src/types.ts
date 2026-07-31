@@ -14,6 +14,9 @@ export interface Hours {
   close?: number
 }
 
+/** Nível de segurança percebido (orientação geral, editável pelo usuário). */
+export type SafetyLevel = 'tranquilo' | 'atencao' | 'evitar'
+
 export interface Stop {
   id: string
   name: string
@@ -31,6 +34,8 @@ export interface Stop {
   hours?: Hours
   /** ex.: "só domingo — indisponível nas datas da viagem" */
   unavailableNote?: string
+  /** orientação de segurança (geral/diurna), editável */
+  safety?: SafetyLevel
 }
 
 export interface Day {

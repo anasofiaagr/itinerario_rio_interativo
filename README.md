@@ -43,6 +43,9 @@ O terminal mostra um endereço `http://localhost:5199` e também um endereço de
 - ✨ **Otimizar o dia**: reordena para reduzir o tempo de trânsito, respeitando paradas
   travadas 🔒, a primeira/última (base) e janelas de horário (ex.: Jardim Botânico
   fecha 17h). Mostra o *antes → depois* e dá pra desfazer.
+- 🟢 **Segurança por lugar** (🟢 tranquilo / 🟡 atenção / 🔴 evitar): um chip no card e
+  um seletor na edição. Os valores iniciais são só **orientação geral e diurna** que
+  guias de viagem publicam — **você ajusta** cada um. Ver *Sobre a segurança* abaixo.
 - 💾 **Exportar / importar JSON** e **resetar** pro roteiro original (menu ⋯).
 
 ## Sobre os serviços públicos
@@ -57,6 +60,23 @@ Se algum serviço falhar ou estiver ocupado, o app **não quebra**: cai para uma
 estimativa em **linha reta** (mostrada como linha pontilhada / etiqueta “linha reta”).
 
 O mapa mostra a atribuição do OpenStreetMap, como a licença exige.
+
+## Sobre a segurança
+
+O nível de segurança de cada lugar **não é um dado oficial nem uma nota minha** — é
+uma orientação **geral e diurna**, resumida do que guias de viagem publicam sobre as
+regiões (Zona Sul, Urca e Jardim Botânico costumam ser mais tranquilos; Centro e Lapa
+pedem mais atenção, sobretudo à noite e em fins de semana; praias isoladas da Zona
+Oeste são melhor visitadas acompanhada). **Tudo é editável** — ajuste com base no que
+amigas e pessoas locais te disserem, que vale mais que qualquer guia.
+
+Fontes usadas como referência (padrões gerais por bairro):
+- [Diário do Rio — lugares mais seguros para visitar](https://diariodorio.com/lista-de-lugares-mais-seguros-para-visitar-no-rio-de-janeiro/)
+- [Viaje na Viagem — Rio com segurança](https://www.viajenaviagem.com/destino/rio-de-janeiro/seguranca/)
+- [Rio & Learn — Is Rio de Janeiro Safe? Tips for Tourists](https://rioandlearn.com/is-rio-de-janeiro-safe/)
+
+Para decisões de verdade, confira também fontes oficiais e atualizadas no período da
+viagem.
 
 ## Dados iniciais
 

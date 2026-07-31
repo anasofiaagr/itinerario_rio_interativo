@@ -1,6 +1,6 @@
 import type { Category, Day, Stop } from '../types'
 import type { Action, Target } from '../store/itinerary'
-import { CATEGORY_EMOJI, CATEGORY_LABEL } from '../data/palette'
+import { CATEGORY_EMOJI, CATEGORY_LABEL, SAFETY_META, SAFETY_LEVELS } from '../data/palette'
 
 const CATEGORIES = Object.keys(CATEGORY_EMOJI) as Category[]
 
@@ -73,6 +73,37 @@ export default function EditStopSheet({ stop, container, days, dispatch, onClose
           />
           <span>🔒 Travar (não reordena no otimizador)</span>
         </label>
+
+        <div className="edit__safety">
+          <span>Segurança (sua avaliação)</span>
+          <div className="seg">
+            <button
+              type="button"
+              className={!stop.safety ? 'on' : ''}
+              onClick={() => set({ safety: undefined })}
+            >
+              —
+            </button>
+            {SAFETY_LEVELS.map((lvl) => (
+              <button
+                type="button"
+                key={lvl}
+                className={stop.safety === lvl ? 'on' : ''}
+                style={
+                  stop.safety === lvl
+                    ? ({ ['--sf' as string]: SAFETY_META[lvl].color, borderColor: SAFETY_META[lvl].color })
+                    : undefined
+                }
+                onClick={() => set({ safety: lvl })}
+              >
+                {SAFETY_META[lvl].emoji} {SAFETY_META[lvl].label}
+              </button>
+            ))}
+          </div>
+          <small className="edit__hint">
+            Orientação geral/diurna dos guias — ajuste como quiser.
+          </small>
+        </div>
 
         <div className="edit__move">
           <span>Mover para</span>
