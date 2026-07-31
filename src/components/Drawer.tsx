@@ -25,6 +25,7 @@ interface Props {
   dispatch: React.Dispatch<Action>
   onSelectTab: (t: Target) => void
   onSelectStop: (id: string) => void
+  onEditStop: (id: string) => void
   onOpenSearch: () => void
   onOpenOptimize: () => void
   onToggleExpanded: () => void
@@ -124,14 +125,12 @@ export default function Drawer(props: Props) {
               <StopCard
                 key={s.id}
                 stop={s}
-                container={active}
                 order={orderById.get(s.id) ?? null}
                 legSec={legById.get(s.id)}
                 color={color}
-                days={itinerary.days}
                 selected={s.id === selectedStopId}
                 onSelect={() => props.onSelectStop(s.id)}
-                dispatch={dispatch}
+                onEdit={() => props.onEditStop(s.id)}
               />
             ))}
             {stops.length === 0 && (

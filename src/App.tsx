@@ -8,6 +8,7 @@ import MapView from './components/MapView'
 import Drawer from './components/Drawer'
 import SearchPanel from './components/SearchPanel'
 import OptimizeDialog from './components/OptimizeDialog'
+import EditStopSheet from './components/EditStopSheet'
 
 export default function App() {
   const { itinerary, dispatch } = useItinerary()
@@ -18,9 +19,22 @@ export default function App() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [optimizeOpen, setOptimizeOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [editingStopId, setEditingStopId] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const activeDay = itinerary.days.find((d) => d.id === active)
+
+  // Localiza a parada em edição e seu container (dia ou banco)
+  const editing = useMemo(() => {
+    if (!editingStopId) return null
+    for (const d of itinerary.days) {
+      const s = d.stops.find((x) => x.id === editingStopId)
+      if (s) return { stop: s, container: d.id as Target }
+    }
+    const p = itinerary.pool.stops.find((x) => x.id === editingStopId)
+    if (p) return { stop: p, container: 'pool' as Target }
+    return null
+  }, [editingStopId, itinerary])
 
   // Dias reais visíveis (para rota): dia atual ou viagem inteira
   const routeDays: Day[] = useMemo(
@@ -147,6 +161,7 @@ export default function App() {
           setSelectedStopId(null)
         }}
         onSelectStop={selectStop}
+        onEditStop={(id) => setEditingStopId(id)}
         onOpenSearch={() => setSearchOpen(true)}
         onOpenOptimize={() => setOptimizeOpen(true)}
         onToggleExpanded={() => setExpanded((v) => !v)}
@@ -169,6 +184,20 @@ export default function App() {
         <div className="overlay" onClick={() => setOptimizeOpen(false)}>
           <div onClick={(e) => e.stopPropagation()}>
             <OptimizeDialog day={activeDay} dispatch={dispatch} onClose={() => setOptimizeOpen(false)} />
+          </div>
+        </div>
+      )}
+
+      {editing && (
+        <div className="overlay" onClick={() => setEditingStopId(null)}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <EditStopSheet
+              stop={editing.stop}
+              container={editing.container}
+              days={itinerary.days}
+              dispatch={dispatch}
+              onClose={() => setEditingStopId(null)}
+            />
           </div>
         </div>
       )}
