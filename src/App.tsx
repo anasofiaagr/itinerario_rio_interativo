@@ -14,6 +14,7 @@ export default function App() {
   const { itinerary, dispatch } = useItinerary()
   const [active, setActive] = useState<Target>(itinerary.days[0]?.id ?? 'pool')
   const [selectedStopId, setSelectedStopId] = useState<string | null>(null)
+  const [centerNonce, setCenterNonce] = useState(0)
   const [showAllTrip, setShowAllTrip] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -62,6 +63,7 @@ export default function App() {
 
   function selectStop(id: string) {
     setSelectedStopId(id)
+    setCenterNonce((n) => n + 1) // recentraliza mesmo se for o mesmo card
   }
 
   function onImportFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -86,6 +88,7 @@ export default function App() {
         visibleDays={mapDays}
         routes={routes}
         selectedStopId={selectedStopId}
+        centerNonce={centerNonce}
         onSelectStop={selectStop}
       />
 
