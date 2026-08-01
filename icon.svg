@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6a94a"/>
+      <stop offset="1" stop-color="#e8622a"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#sky)"/>
+  <circle cx="256" cy="196" r="70" fill="#fff2dc"/>
+  <!-- morros / Pão de Açúcar estilizado -->
+  <path d="M96 372 C150 300 190 300 236 372 Z" fill="#7a3b1e"/>
+  <path d="M250 372 C300 286 360 286 416 372 Z" fill="#5e2c14"/>
+  <!-- onda -->
+  <path d="M64 392 q48 -28 96 0 t96 0 t96 0 t96 0 v56 H64 Z" fill="#f9e4c6"/>
+  <path d="M64 416 q48 -24 96 0 t96 0 t96 0 t96 0 v40 H64 Z" fill="#fbeed6"/>
+</svg>
