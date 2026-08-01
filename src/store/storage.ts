@@ -29,10 +29,16 @@ const DEFAULT_BANKS: Bank[] = [
   { id: 'wine', label: 'Vinho', emoji: '🍷', color: WINE_COLOR, stops: [] },
 ]
 
+// Bancos com conteúdo curado no seed que devem ser preenchidos automaticamente
+// ao subir de versão (sem apagar nada que o usuário já tenha ali).
+const CURATED_BANK_IDS = ['restaurants', 'wine']
+
 /** Garante os campos mínimos e migra formatos antigos (pool -> banks). */
 function migrate(raw: unknown): Itinerary {
-  const it = raw as Partial<Itinerary> & { pool?: { stops?: unknown[] } }
+  const it = raw as Partial<Itinerary> & { pool?: { stops?: unknown[] }; version?: number }
   if (!it || !Array.isArray(it.days)) return makeSeed()
+
+  const storedVersion = it.version ?? 1
 
   let banks: Bank[]
   if (Array.isArray(it.banks) && it.banks.length) {
@@ -49,8 +55,19 @@ function migrate(raw: unknown): Itinerary {
     if (!banks.some((b) => b.id === def.id)) banks.push({ ...def })
   }
 
+  // v2: preenche Restaurantes/Vinho a partir do seed quando ainda estão vazios,
+  // para que quem já tinha dados salvos receba os lugares sem precisar resetar.
+  if (storedVersion < 2) {
+    const seed = makeSeed()
+    banks = banks.map((b) => {
+      if (!CURATED_BANK_IDS.includes(b.id) || b.stops.length > 0) return b
+      const seedBank = seed.banks.find((sb) => sb.id === b.id)
+      return seedBank ? { ...b, stops: seedBank.stops } : b
+    })
+  }
+
   return {
-    version: it.version ?? SEED_VERSION,
+    version: SEED_VERSION,
     days: it.days.map((d) => ({ ...d, profile: d.profile ?? 'driving', stops: d.stops ?? [] })),
     banks,
   }

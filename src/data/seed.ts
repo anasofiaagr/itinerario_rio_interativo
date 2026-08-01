@@ -62,7 +62,7 @@ function applySafety(it: Itinerary): void {
 // (café, almoço, noite com amigas) ficam sem coordenada — só agenda.
 // Bases usam o centroide do bairro (endereço real é privado).
 
-export const SEED_VERSION = 1
+export const SEED_VERSION = 2
 
 export function makeSeed(): Itinerary {
   const it: Itinerary = {
