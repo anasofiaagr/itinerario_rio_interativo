@@ -55,14 +55,26 @@ function migrate(raw: unknown): Itinerary {
     if (!banks.some((b) => b.id === def.id)) banks.push({ ...def })
   }
 
-  // v2: preenche Restaurantes/Vinho a partir do seed quando ainda estão vazios,
-  // para que quem já tinha dados salvos receba os lugares sem precisar resetar.
-  if (storedVersion < 2) {
+  // Preenche/atualiza os bancos curados (Restaurantes/Vinho) a partir do seed,
+  // sem apagar nada que o usuário tenha ali. Roda quando a versão salva é antiga.
+  if (storedVersion < SEED_VERSION) {
     const seed = makeSeed()
     banks = banks.map((b) => {
-      if (!CURATED_BANK_IDS.includes(b.id) || b.stops.length > 0) return b
+      if (!CURATED_BANK_IDS.includes(b.id)) return b
       const seedBank = seed.banks.find((sb) => sb.id === b.id)
-      return seedBank ? { ...b, stops: seedBank.stops } : b
+      if (!seedBank) return b
+      // banco vazio: preenche com o seed inteiro
+      if (b.stops.length === 0) return { ...b, stops: seedBank.stops }
+      // banco já preenchido: só completa coordenadas que faltam (mantém edições)
+      const seedById = new Map(seedBank.stops.map((s) => [s.id, s]))
+      const stops = b.stops.map((s) => {
+        const seedStop = seedById.get(s.id)
+        if (seedStop && typeof s.lat !== 'number' && typeof seedStop.lat === 'number') {
+          return { ...s, lat: seedStop.lat, lng: seedStop.lng }
+        }
+        return s
+      })
+      return { ...b, stops }
     })
   }
 

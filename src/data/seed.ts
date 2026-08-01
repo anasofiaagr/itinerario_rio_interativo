@@ -45,7 +45,22 @@ const SAFETY_BY_ID: Record<string, SafetyLevel> = {
   'rest-miako': 'tranquilo',
   'rest-tacaca': 'tranquilo',
   'rest-labuta': 'atencao',
+  'rest-quintalzico': 'tranquilo',
+  'rest-ryu': 'tranquilo',
+  'rest-gabbiano': 'tranquilo',
+  'rest-jappa': 'tranquilo',
+  'rest-hachiko': 'tranquilo',
+  'rest-muah': 'tranquilo',
+  'rest-abba': 'tranquilo',
+  'rest-zaza': 'tranquilo',
+  'rest-brejo': 'tranquilo',
+  'rest-surreal': 'tranquilo',
+  'rest-guadalupe': 'tranquilo',
+  'rest-kinjo': 'tranquilo',
   'vinho-jojo': 'tranquilo',
+  'vinho-libo': 'tranquilo',
+  'vinho-grado': 'tranquilo',
+  'vinho-cedilha': 'tranquilo',
 }
 
 function applySafety(it: Itinerary): void {
@@ -62,7 +77,7 @@ function applySafety(it: Itinerary): void {
 // (café, almoço, noite com amigas) ficam sem coordenada — só agenda.
 // Bases usam o centroide do bairro (endereço real é privado).
 
-export const SEED_VERSION = 2
+export const SEED_VERSION = 3
 
 export function makeSeed(): Itinerary {
   const it: Itinerary = {
@@ -447,27 +462,27 @@ export function makeSeed(): Itinerary {
         stops: [
           // Recreio / Barra
           { id: 'rest-natural', name: 'Natural Rio', emoji: '🥗', lat: -23.0239568, lng: -43.4867718, category: 'comida', notes: 'Recreio · natural/saudável' },
-          { id: 'rest-quintalzico', name: 'Quintal do Zico', emoji: '⚽', category: 'comida', notes: 'Recreio (kkk)' },
-          { id: 'rest-ryu', name: 'Ryu', emoji: '🍜', category: 'comida', notes: 'Barra · coreano' },
+          { id: 'rest-quintalzico', name: 'Quintal do Zico', emoji: '⚽', lat: -23.001233, lng: -43.396538, category: 'comida', notes: 'Barra (Vogue Square) · kkk' },
+          { id: 'rest-ryu', name: 'Ryu', emoji: '🍜', lat: -23.003827, lng: -43.427923, category: 'comida', notes: 'Barra · coreano' },
           { id: 'rest-asario', name: 'Asa Rio', emoji: '🍽️', lat: -23.0171789, lng: -43.4593351, category: 'comida', notes: 'Recreio' },
-          { id: 'rest-gabbiano', name: 'Gabbiano', emoji: '🍝', category: 'comida', notes: 'Recreio · italiano' },
-          { id: 'rest-jappa', name: 'Jappa da Quitanda', emoji: '🍣', category: 'comida', notes: 'Barra' },
-          { id: 'rest-hachiko', name: 'Hachiko', emoji: '🍱', category: 'comida', notes: 'Barra · japonês' },
-          { id: 'rest-muah', name: 'Muah Gastrobar', emoji: '🍹', category: 'comida', notes: 'Recreio · beira praia' },
-          { id: 'rest-abba', name: 'Abba Cake', emoji: '🧁', category: 'comida', notes: 'Recreio · padaria sem glúten e sem lactose (kkk)' },
+          { id: 'rest-gabbiano', name: 'Gabbiano', emoji: '🍝', lat: -22.9887072, lng: -43.3595728, category: 'comida', notes: 'Barra · italiano' },
+          { id: 'rest-jappa', name: 'Jappa da Quitanda', emoji: '🍣', lat: -22.998321, lng: -43.355855, category: 'comida', notes: 'Barra (BarraShopping) · japonês' },
+          { id: 'rest-hachiko', name: 'Hachiko', emoji: '🍱', lat: -23.012743, lng: -43.311697, category: 'comida', notes: 'Barra (Jardim Oceânico) · japonês' },
+          { id: 'rest-muah', name: 'Muah Gastrobar', emoji: '🍹', lat: -23.0106862, lng: -43.3383336, category: 'comida', notes: 'Barra · beira praia' },
+          { id: 'rest-abba', name: 'Abba Cake', emoji: '🧁', lat: -23.000737, lng: -43.362395, category: 'comida', notes: 'Barra (Midtown) · padaria sem glúten e sem lactose (kkk)' },
           // Ipanema
           { id: 'rest-viasete', name: 'Via Sete', emoji: '🥙', lat: -22.9831875, lng: -43.2092695, category: 'comida', notes: 'Ipanema' },
-          { id: 'rest-zaza', name: 'Zazá Bistrô', emoji: '🍛', category: 'comida', notes: 'Ipanema · bistrô' },
+          { id: 'rest-zaza', name: 'Zazá Bistrô', emoji: '🍛', lat: -22.9854757, lng: -43.2048694, category: 'comida', notes: 'Ipanema · bistrô' },
           { id: 'rest-boapraca', name: 'Boa Praça', emoji: '🍺', lat: -22.9868412, lng: -43.1972421, category: 'comida', notes: 'Ipanema' },
-          // Botafogo
+          // Botafogo / Flamengo / Copacabana
           { id: 'rest-tero', name: 'Bar Tero', emoji: '🍽️', lat: -22.9560448, lng: -43.1862622, category: 'comida', notes: 'Botafogo · preciso ir!' },
-          { id: 'rest-brejo', name: 'Brejo Bar', emoji: '🏳️‍🌈', category: 'comida', notes: 'Botafogo · bar LGBT' },
-          { id: 'rest-surreal', name: 'Surreal Bar', emoji: '🍸', category: 'comida', notes: 'Botafogo' },
-          { id: 'rest-guadalupe', name: 'Guadalupe', emoji: '🌮', category: 'comida', notes: 'Botafogo · mexicano' },
-          { id: 'rest-joaquina', name: 'Joaquina', emoji: '🍽️', lat: -22.9553613, lng: -43.1966086, category: 'comida', notes: 'Botafogo' },
+          { id: 'rest-brejo', name: 'Brejo Bar', emoji: '🏳️‍🌈', lat: -22.934426, lng: -43.175934, category: 'comida', notes: 'Flamengo · bar LGBT' },
+          { id: 'rest-surreal', name: 'Surreal Bar', emoji: '🍸', lat: -22.954421, lng: -43.186769, category: 'comida', notes: 'Botafogo · bar temático' },
+          { id: 'rest-guadalupe', name: 'Guadalupe', emoji: '🌮', lat: -22.955193, lng: -43.192186, category: 'comida', notes: 'Botafogo · mexicano' },
+          { id: 'rest-joaquina', name: 'Joaquina', emoji: '🍽️', lat: -22.9553613, lng: -43.1966086, category: 'comida', notes: 'Botafogo/Humaitá' },
           { id: 'rest-miako', name: 'Miako', emoji: '🍣', lat: -22.9415752, lng: -43.1811549, category: 'comida', notes: 'Botafogo · japonês autêntico (kkk)' },
           { id: 'rest-tacaca', name: 'Tacacá do Norte', emoji: '🫐', lat: -22.9330522, lng: -43.176548, category: 'comida', notes: 'Flamengo · açaí de verdade rs' },
-          { id: 'rest-kinjo', name: 'Kinjo', emoji: '🐟', category: 'comida', notes: 'Botafogo · peruano' },
+          { id: 'rest-kinjo', name: 'Kinjo', emoji: '🐟', lat: -22.965415, lng: -43.177963, category: 'comida', notes: 'Copacabana · peruano/nikkei' },
           // Rua do Senado
           { id: 'rest-labuta', name: 'Labuta Bar', emoji: '🍺', lat: -22.9092115, lng: -43.1846353, category: 'comida', notes: 'Rua do Senado / Centro' },
         ],
@@ -479,9 +494,9 @@ export function makeSeed(): Itinerary {
         color: WINE_COLOR,
         stops: [
           { id: 'vinho-jojo', name: 'Jojô', emoji: '🍷', lat: -22.9653049, lng: -43.2269306, category: 'comida', notes: 'Jardim Botânico · vinhozinho' },
-          { id: 'vinho-libo', name: 'Libô', emoji: '🍷', category: 'comida', notes: 'Vinho (me passa o endereço pra fixar no mapa)' },
-          { id: 'vinho-grado', name: 'Grado', emoji: '🍷', category: 'comida', notes: 'Vinho (me passa o endereço pra fixar no mapa)' },
-          { id: 'vinho-cedilha', name: 'Cedilha', emoji: '🍷', category: 'comida', notes: 'Vinho (me passa o endereço pra fixar no mapa)' },
+          { id: 'vinho-libo', name: 'Libô', emoji: '🍷', lat: -22.953313, lng: -43.196346, category: 'comida', notes: 'Botafogo · comida e vinho' },
+          { id: 'vinho-grado', name: 'Grado', emoji: '🍷', lat: -22.965473, lng: -43.220149, category: 'comida', notes: 'Jardim Botânico · italiano e vinho' },
+          { id: 'vinho-cedilha', name: 'Cedilha', emoji: '🍷', lat: -22.981961, lng: -43.223768, category: 'comida', notes: 'Leblon · bar e vinho' },
         ],
       },
     ],
