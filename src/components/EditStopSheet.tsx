@@ -1,4 +1,4 @@
-import type { Category, Day, Stop } from '../types'
+import type { Bank, Category, Day, Stop } from '../types'
 import type { Action, Target } from '../store/itinerary'
 import { CATEGORY_EMOJI, CATEGORY_LABEL, SAFETY_META, SAFETY_LEVELS } from '../data/palette'
 
@@ -8,11 +8,12 @@ interface Props {
   stop: Stop
   container: Target
   days: Day[]
+  banks: Bank[]
   dispatch: React.Dispatch<Action>
   onClose: () => void
 }
 
-export default function EditStopSheet({ stop, container, days, dispatch, onClose }: Props) {
+export default function EditStopSheet({ stop, container, days, banks, dispatch, onClose }: Props) {
   const set = (patch: Partial<Stop>) => dispatch({ type: 'update', stopId: stop.id, patch })
 
   return (
@@ -125,7 +126,13 @@ export default function EditStopSheet({ stop, container, days, dispatch, onClose
                   {d.emoji} {d.label}
                 </option>
               ))}
-            {container !== 'pool' && <option value="pool">💡 Banco de ideias</option>}
+            {banks
+              .filter((b) => b.id !== container)
+              .map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.emoji} {b.label}
+                </option>
+              ))}
           </select>
         </div>
 

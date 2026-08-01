@@ -1,49 +1,56 @@
 import { useEffect, useReducer } from 'react'
-import type { Day, Itinerary, Stop } from '../types'
+import type { Bank, Itinerary, Stop } from '../types'
 import { loadItinerary, saveItinerary } from './storage'
 import { makeSeed } from '../data/seed'
 
-export type Target = string | 'pool' // dayId ou 'pool'
+/** id de um container: um dia (dayId) ou um banco (bankId). */
+export type Target = string
 
 export type Action =
   | { type: 'add'; target: Target; stop: Stop; index?: number }
   | { type: 'remove'; stopId: string }
   | { type: 'update'; stopId: string; patch: Partial<Stop> }
-  | { type: 'reorder'; dayId: string; orderedIds: string[] }
-  | { type: 'reorderPool'; orderedIds: string[] }
+  | { type: 'reorder'; containerId: Target; orderedIds: string[] }
   | { type: 'move'; stopId: string; target: Target; index?: number }
   | { type: 'setProfile'; dayId: string; profile: 'foot' | 'driving' | 'transit' }
   | { type: 'import'; itinerary: Itinerary }
   | { type: 'reset' }
 
-function mapDay(it: Itinerary, dayId: string, fn: (d: Day) => Day): Itinerary {
-  return { ...it, days: it.days.map((d) => (d.id === dayId ? fn(d) : d)) }
+/** Reordena as paradas de um container conforme a lista de ids. */
+function applyOrder(stops: Stop[], orderedIds: string[]): Stop[] {
+  const byId = new Map(stops.map((s) => [s.id, s]))
+  const ordered = orderedIds.map((id) => byId.get(id)).filter((s): s is Stop => Boolean(s))
+  const rest = stops.filter((s) => !orderedIds.includes(s.id)) // segurança
+  return [...ordered, ...rest]
+}
+
+/** Aplica uma transformação nos stops do container (dia ou banco) com aquele id. */
+function mapContainer(it: Itinerary, id: Target, fn: (stops: Stop[]) => Stop[]): Itinerary {
+  return {
+    ...it,
+    days: it.days.map((d) => (d.id === id ? { ...d, stops: fn(d.stops) } : d)),
+    banks: it.banks.map((b) => (b.id === id ? { ...b, stops: fn(b.stops) } : b)),
+  }
 }
 
 /** Remove a parada de onde estiver e devolve o novo estado + a parada removida. */
 function extract(it: Itinerary, stopId: string): { it: Itinerary; stop?: Stop } {
   let found: Stop | undefined
-  const days = it.days.map((d) => {
-    const s = d.stops.find((x) => x.id === stopId)
+  const strip = (stops: Stop[]) => {
+    const s = stops.find((x) => x.id === stopId)
     if (s) found = s
-    return { ...d, stops: d.stops.filter((x) => x.id !== stopId) }
-  })
-  const poolStop = it.pool.stops.find((x) => x.id === stopId)
-  if (poolStop) found = poolStop
-  const pool = { stops: it.pool.stops.filter((x) => x.id !== stopId) }
-  return { it: { ...it, days, pool }, stop: found }
+    return stops.filter((x) => x.id !== stopId)
+  }
+  const days = it.days.map((d) => ({ ...d, stops: strip(d.stops) }))
+  const banks = it.banks.map((b) => ({ ...b, stops: strip(b.stops) }))
+  return { it: { ...it, days, banks }, stop: found }
 }
 
 function insert(it: Itinerary, target: Target, stop: Stop, index?: number): Itinerary {
-  if (target === 'pool') {
-    const stops = [...it.pool.stops]
-    stops.splice(index ?? stops.length, 0, stop)
-    return { ...it, pool: { stops } }
-  }
-  return mapDay(it, target, (d) => {
-    const stops = [...d.stops]
-    stops.splice(index ?? stops.length, 0, stop)
-    return { ...d, stops }
+  return mapContainer(it, target, (stops) => {
+    const next = [...stops]
+    next.splice(index ?? next.length, 0, stop)
+    return next
   })
 }
 
@@ -60,29 +67,12 @@ export function reducer(state: Itinerary, action: Action): Itinerary {
       return {
         ...state,
         days: state.days.map((d) => ({ ...d, stops: d.stops.map(patchStop) })),
-        pool: { stops: state.pool.stops.map(patchStop) },
+        banks: state.banks.map((b) => ({ ...b, stops: b.stops.map(patchStop) })),
       }
     }
 
     case 'reorder':
-      return mapDay(state, action.dayId, (d) => {
-        const byId = new Map(d.stops.map((s) => [s.id, s]))
-        const ordered = action.orderedIds
-          .map((id) => byId.get(id))
-          .filter((s): s is Stop => Boolean(s))
-        // preserva qualquer parada que não veio na lista (segurança)
-        const rest = d.stops.filter((s) => !action.orderedIds.includes(s.id))
-        return { ...d, stops: [...ordered, ...rest] }
-      })
-
-    case 'reorderPool': {
-      const byId = new Map(state.pool.stops.map((s) => [s.id, s]))
-      const ordered = action.orderedIds
-        .map((id) => byId.get(id))
-        .filter((s): s is Stop => Boolean(s))
-      const rest = state.pool.stops.filter((s) => !action.orderedIds.includes(s.id))
-      return { ...state, pool: { stops: [...ordered, ...rest] } }
-    }
+      return mapContainer(state, action.containerId, (stops) => applyOrder(stops, action.orderedIds))
 
     case 'move': {
       const { it, stop } = extract(state, action.stopId)
@@ -91,7 +81,12 @@ export function reducer(state: Itinerary, action: Action): Itinerary {
     }
 
     case 'setProfile':
-      return mapDay(state, action.dayId, (d) => ({ ...d, profile: action.profile }))
+      return {
+        ...state,
+        days: state.days.map((d) =>
+          d.id === action.dayId ? { ...d, profile: action.profile } : d,
+        ),
+      }
 
     case 'import':
       return action.itinerary
@@ -102,6 +97,17 @@ export function reducer(state: Itinerary, action: Action): Itinerary {
     default:
       return state
   }
+}
+
+/** Encontra o container (dia ou banco) que contém a parada. */
+export function findContainerId(it: Itinerary, stopId: string): Target | null {
+  for (const d of it.days) if (d.stops.some((s) => s.id === stopId)) return d.id
+  for (const b of it.banks) if (b.stops.some((s) => s.id === stopId)) return b.id
+  return null
+}
+
+export function bankById(it: Itinerary, id: string): Bank | undefined {
+  return it.banks.find((b) => b.id === id)
 }
 
 export function useItinerary() {

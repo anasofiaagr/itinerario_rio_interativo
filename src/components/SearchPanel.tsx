@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Day, Stop } from '../types'
+import type { Bank, Day, Stop } from '../types'
 import type { Action, Target } from '../store/itinerary'
 import { newId } from '../store/itinerary'
 import { searchRio, RateLimitError, type NomResult } from '../services/nominatim'
 
 interface Props {
   days: Day[]
+  banks: Bank[]
   defaultTarget: Target
   dispatch: React.Dispatch<Action>
   onClose: () => void
@@ -13,7 +14,7 @@ interface Props {
 
 type Status = 'idle' | 'loading' | 'ok' | 'empty' | 'error' | 'rate'
 
-export default function SearchPanel({ days, defaultTarget, dispatch, onClose }: Props) {
+export default function SearchPanel({ days, banks, defaultTarget, dispatch, onClose }: Props) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<NomResult[]>([])
   const [status, setStatus] = useState<Status>('idle')
@@ -81,7 +82,11 @@ export default function SearchPanel({ days, defaultTarget, dispatch, onClose }: 
               {d.emoji} {d.label}
             </option>
           ))}
-          <option value="pool">💡 Banco de ideias</option>
+          {banks.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.emoji} {b.label}
+            </option>
+          ))}
         </select>
       </label>
 

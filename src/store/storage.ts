@@ -1,5 +1,6 @@
-import type { Itinerary } from '../types'
+import type { Bank, Itinerary } from '../types'
 import { makeSeed, SEED_VERSION } from '../data/seed'
+import { POOL_COLOR, RESTAURANT_COLOR } from '../data/palette'
 
 const STORAGE_KEY = 'roteiro-rio:v1'
 
@@ -8,8 +9,7 @@ export function loadItinerary(): Itinerary {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return makeSeed()
-    const parsed = JSON.parse(raw) as Itinerary
-    return migrate(parsed)
+    return migrate(JSON.parse(raw))
   } catch {
     return makeSeed()
   }
@@ -23,13 +23,35 @@ export function saveItinerary(it: Itinerary): void {
   }
 }
 
-/** Migrações futuras por versão. Hoje só garante os campos mínimos. */
-function migrate(it: Itinerary): Itinerary {
+const DEFAULT_BANKS: Bank[] = [
+  { id: 'pool', label: 'Banco de ideias', emoji: '💡', color: POOL_COLOR, stops: [] },
+  { id: 'restaurants', label: 'Restaurantes', emoji: '🍽️', color: RESTAURANT_COLOR, stops: [] },
+]
+
+/** Garante os campos mínimos e migra formatos antigos (pool -> banks). */
+function migrate(raw: unknown): Itinerary {
+  const it = raw as Partial<Itinerary> & { pool?: { stops?: unknown[] } }
   if (!it || !Array.isArray(it.days)) return makeSeed()
+
+  let banks: Bank[]
+  if (Array.isArray(it.banks) && it.banks.length) {
+    banks = it.banks as Bank[]
+  } else {
+    // formato antigo: um único `pool`
+    const poolStops = it.pool?.stops ?? []
+    banks = DEFAULT_BANKS.map((b) =>
+      b.id === 'pool' ? { ...b, stops: poolStops as Bank['stops'] } : { ...b },
+    )
+  }
+  // garante que os bancos padrão existam
+  for (const def of DEFAULT_BANKS) {
+    if (!banks.some((b) => b.id === def.id)) banks.push({ ...def })
+  }
+
   return {
     version: it.version ?? SEED_VERSION,
     days: it.days.map((d) => ({ ...d, profile: d.profile ?? 'driving', stops: d.stops ?? [] })),
-    pool: it.pool ?? { stops: [] },
+    banks,
   }
 }
 
@@ -41,10 +63,10 @@ export function exportJson(it: Itinerary): string {
 export function parseImport(raw: string): Itinerary | null {
   try {
     const data = JSON.parse(raw)
-    if (!data || !Array.isArray(data.days) || !data.pool || !Array.isArray(data.pool.stops)) {
-      return null
-    }
-    return migrate(data as Itinerary)
+    if (!data || !Array.isArray(data.days)) return null
+    // aceita tanto o formato novo (banks) quanto o antigo (pool)
+    if (!Array.isArray(data.banks) && !data.pool) return null
+    return migrate(data)
   } catch {
     return null
   }

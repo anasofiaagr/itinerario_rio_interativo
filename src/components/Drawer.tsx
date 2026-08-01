@@ -7,7 +7,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import type { Itinerary, Day, Stop } from '../types'
+import type { Itinerary, Day, Stop, Bank } from '../types'
 import type { Action, Target } from '../store/itinerary'
 import { geoStops } from '../lib/day'
 import { formatDistance, formatDuration } from '../lib/geo'
@@ -36,8 +36,9 @@ export default function Drawer(props: Props) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
 
   const day: Day | undefined = itinerary.days.find((d) => d.id === active)
-  const stops: Stop[] = active === 'pool' ? itinerary.pool.stops : day?.stops ?? []
-  const color = active === 'pool' ? POOL_COLOR : day?.color ?? POOL_COLOR
+  const bank: Bank | undefined = itinerary.banks.find((b) => b.id === active)
+  const stops: Stop[] = day?.stops ?? bank?.stops ?? []
+  const color = day?.color ?? bank?.color ?? POOL_COLOR
 
   // ordem geográfica + tempos de trecho
   const gs = day ? geoStops(day) : []
@@ -62,8 +63,7 @@ export default function Drawer(props: Props) {
     if (from < 0 || to < 0) return
     const next = ids.slice()
     next.splice(to, 0, next.splice(from, 1)[0])
-    if (active === 'pool') dispatch({ type: 'reorderPool', orderedIds: next })
-    else if (day) dispatch({ type: 'reorder', dayId: day.id, orderedIds: next })
+    dispatch({ type: 'reorder', containerId: active, orderedIds: next })
   }
 
   return (
@@ -74,7 +74,7 @@ export default function Drawer(props: Props) {
 
       <DayTabs
         days={itinerary.days}
-        poolCount={itinerary.pool.stops.length}
+        banks={itinerary.banks}
         active={active}
         onSelect={props.onSelectTab}
       />
@@ -123,7 +123,7 @@ export default function Drawer(props: Props) {
           </>
         ) : (
           <div className="drawer__actions drawer__actions--pool">
-            <span className="totals__main">💡 Ideias fora dos dias</span>
+            <span className="totals__main">{bank?.emoji} {bank?.label}</span>
             <button className="btn btn--sm" onClick={props.onOpenSearch}>＋ Lugar</button>
           </div>
         )}

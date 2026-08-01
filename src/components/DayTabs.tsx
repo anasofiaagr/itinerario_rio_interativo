@@ -1,10 +1,9 @@
-import type { Day } from '../types'
-import { POOL_COLOR } from '../data/palette'
+import type { Bank, Day } from '../types'
 import type { Target } from '../store/itinerary'
 
 interface Props {
   days: Day[]
-  poolCount: number
+  banks: Bank[]
   active: Target
   onSelect: (t: Target) => void
 }
@@ -17,7 +16,7 @@ function shortDate(iso: string): string {
   return `${wd} ${d}/${m}`
 }
 
-export default function DayTabs({ days, poolCount, active, onSelect }: Props) {
+export default function DayTabs({ days, banks, active, onSelect }: Props) {
   return (
     <div className="tabs" role="tablist">
       {days.map((d) => {
@@ -37,17 +36,23 @@ export default function DayTabs({ days, poolCount, active, onSelect }: Props) {
           </button>
         )
       })}
-      <button
-        role="tab"
-        aria-selected={active === 'pool'}
-        className={`tab ${active === 'pool' ? 'tab--on' : ''}`}
-        style={{ '--tab': POOL_COLOR } as React.CSSProperties}
-        onClick={() => onSelect('pool')}
-      >
-        <span className="tab__emoji">💡</span>
-        <span className="tab__label">Banco de ideias</span>
-        <span className="tab__date">{poolCount} lugares</span>
-      </button>
+      {banks.map((b) => {
+        const on = active === b.id
+        return (
+          <button
+            key={b.id}
+            role="tab"
+            aria-selected={on}
+            className={`tab ${on ? 'tab--on' : ''}`}
+            style={{ '--tab': b.color } as React.CSSProperties}
+            onClick={() => onSelect(b.id)}
+          >
+            <span className="tab__emoji">{b.emoji}</span>
+            <span className="tab__label">{b.label}</span>
+            <span className="tab__date">{b.stops.length} lugares</span>
+          </button>
+        )
+      })}
     </div>
   )
 }

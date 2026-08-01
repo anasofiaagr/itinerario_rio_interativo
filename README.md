@@ -38,7 +38,10 @@ O terminal mostra um endereço `http://localhost:5199` e também um endereço de
   - Cada parada mostra a **estação de metrô mais próxima** (Ⓜ️), com dados do OSM,
     funcionando offline.
 - ✏️ **Editar tudo**: nome, emoji, horário, duração, categoria, travar, notas, mover
-  entre dias ou pro **banco de ideias** 💡.
+  entre dias, pro **banco de ideias** 💡 ou pra aba **Restaurantes** 🍽️.
+- 🍽️ **Aba Restaurantes**: coleção à parte (fora dos dias), com o bairro em cada card;
+  os que o OpenStreetMap conhece viram pino no mapa, os demais ficam como lembrete
+  (“só agenda”). Puxe pro dia quando decidir onde comer.
 - 🔎 **Buscar lugares novos** (Nominatim/OSM) e adicionar a um dia ou ao banco.
 - ✨ **Otimizar o dia**: reordena para reduzir o tempo de trânsito, respeitando paradas
   travadas 🔒, a primeira/última (base) e janelas de horário (ex.: Jardim Botânico

@@ -50,12 +50,17 @@ export interface Day {
   stops: Stop[]
 }
 
-export interface Pool {
+/** Coleção de paradas fora dos dias (Banco de ideias, Restaurantes, …). */
+export interface Bank {
+  id: string
+  label: string
+  emoji: string
+  color: string
   stops: Stop[]
 }
 
 export interface Itinerary {
   version: number
   days: Day[]
-  pool: Pool
+  banks: Bank[]
 }

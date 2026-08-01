@@ -79,11 +79,11 @@ export default function OptimizeDialog({ day, dispatch, onClose }: Props) {
   }, [])
 
   function apply() {
-    dispatch({ type: 'reorder', dayId: day.id, orderedIds: fullOrder })
+    dispatch({ type: 'reorder', containerId: day.id, orderedIds: fullOrder })
     setPhase('applied')
   }
   function undo() {
-    dispatch({ type: 'reorder', dayId: day.id, orderedIds: prevOrder })
+    dispatch({ type: 'reorder', containerId: day.id, orderedIds: prevOrder })
     onClose()
   }
 

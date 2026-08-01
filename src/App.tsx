@@ -1,8 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import type { Day } from './types'
-import { useItinerary, type Target } from './store/itinerary'
+import { useItinerary, findContainerId, type Target } from './store/itinerary'
 import { downloadJson, parseImport } from './store/storage'
-import { POOL_COLOR } from './data/palette'
 import { useRoutes } from './hooks/useRoutes'
 import MapView from './components/MapView'
 import Drawer from './components/Drawer'
@@ -25,17 +24,20 @@ export default function App() {
 
   const activeDay = itinerary.days.find((d) => d.id === active)
 
+  const activeBank = itinerary.banks.find((b) => b.id === active)
+
   // Localiza a parada em edição e seu container (dia ou banco)
   const editing = useMemo(() => {
     if (!editingStopId) return null
-    for (const d of itinerary.days) {
-      const s = d.stops.find((x) => x.id === editingStopId)
-      if (s) return { stop: s, container: d.id as Target }
-    }
-    const p = itinerary.pool.stops.find((x) => x.id === editingStopId)
-    if (p) return { stop: p, container: 'pool' as Target }
-    return null
-  }, [editingStopId, itinerary])
+    const all = [
+      ...itinerary.days.flatMap((d) => d.stops),
+      ...itinerary.banks.flatMap((b) => b.stops),
+    ]
+    const stop = all.find((s) => s.id === editingStopId)
+    if (!stop) return null
+    const container = findContainerId(itinerary, editingStopId) ?? active
+    return { stop, container }
+  }, [editingStopId, itinerary, active])
 
   // Dias reais visíveis (para rota): dia atual ou viagem inteira
   const routeDays: Day[] = useMemo(
@@ -44,22 +46,22 @@ export default function App() {
   )
   const routes = useRoutes(routeDays)
 
-  // Pins do mapa: dias reais + (quando na aba do banco) as ideias como pseudo-dia
+  // Pins do mapa: dias reais + (quando num banco) as paradas do banco como pseudo-dia
   const mapDays: Day[] = useMemo(() => {
     const base = [...routeDays]
-    if (active === 'pool') {
+    if (activeBank) {
       base.push({
-        id: 'pool',
+        id: activeBank.id,
         date: '',
-        label: 'Banco de ideias',
-        emoji: '💡',
-        color: POOL_COLOR,
+        label: activeBank.label,
+        emoji: activeBank.emoji,
+        color: activeBank.color,
         profile: 'foot',
-        stops: itinerary.pool.stops,
+        stops: activeBank.stops,
       })
     }
     return base
-  }, [routeDays, active, itinerary.pool.stops])
+  }, [routeDays, activeBank])
 
   function selectStop(id: string) {
     setSelectedStopId(id)
@@ -175,6 +177,7 @@ export default function App() {
           <div onClick={(e) => e.stopPropagation()}>
             <SearchPanel
               days={itinerary.days}
+              banks={itinerary.banks}
               defaultTarget={active}
               dispatch={dispatch}
               onClose={() => setSearchOpen(false)}
@@ -198,6 +201,7 @@ export default function App() {
               stop={editing.stop}
               container={editing.container}
               days={itinerary.days}
+              banks={itinerary.banks}
               dispatch={dispatch}
               onClose={() => setEditingStopId(null)}
             />
