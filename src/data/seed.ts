@@ -1,5 +1,5 @@
 import type { Itinerary, SafetyLevel } from '../types'
-import { DAY_COLORS, POOL_COLOR, RESTAURANT_COLOR } from './palette'
+import { DAY_COLORS, POOL_COLOR, RESTAURANT_COLOR, WINE_COLOR } from './palette'
 
 // Orientação de segurança GERAL e DIURNA por parada — não é nota minha nem dado
 // oficial; resume o que guias de viagem publicam (Zona Sul/Urca/Jardim Botânico
@@ -45,6 +45,7 @@ const SAFETY_BY_ID: Record<string, SafetyLevel> = {
   'rest-miako': 'tranquilo',
   'rest-tacaca': 'tranquilo',
   'rest-labuta': 'atencao',
+  'vinho-jojo': 'tranquilo',
 }
 
 function applySafety(it: Itinerary): void {
@@ -469,6 +470,18 @@ export function makeSeed(): Itinerary {
           { id: 'rest-kinjo', name: 'Kinjo', emoji: '🐟', category: 'comida', notes: 'Botafogo · peruano' },
           // Rua do Senado
           { id: 'rest-labuta', name: 'Labuta Bar', emoji: '🍺', lat: -22.9092115, lng: -43.1846353, category: 'comida', notes: 'Rua do Senado / Centro' },
+        ],
+      },
+      {
+        id: 'wine',
+        label: 'Vinho',
+        emoji: '🍷',
+        color: WINE_COLOR,
+        stops: [
+          { id: 'vinho-jojo', name: 'Jojô', emoji: '🍷', lat: -22.9653049, lng: -43.2269306, category: 'comida', notes: 'Jardim Botânico · vinhozinho' },
+          { id: 'vinho-libo', name: 'Libô', emoji: '🍷', category: 'comida', notes: 'Vinho (me passa o endereço pra fixar no mapa)' },
+          { id: 'vinho-grado', name: 'Grado', emoji: '🍷', category: 'comida', notes: 'Vinho (me passa o endereço pra fixar no mapa)' },
+          { id: 'vinho-cedilha', name: 'Cedilha', emoji: '🍷', category: 'comida', notes: 'Vinho (me passa o endereço pra fixar no mapa)' },
         ],
       },
     ],

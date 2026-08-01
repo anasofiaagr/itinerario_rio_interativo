@@ -12,6 +12,7 @@ export const DAY_COLORS: string[] = [
 
 export const POOL_COLOR = '#7A7266' // cinza-terra para o banco de ideias
 export const RESTAURANT_COLOR = '#B5533F' // terracota-avermelhado para restaurantes
+export const WINE_COLOR = '#7B2D3A' // bordô para os lugares de vinho
 
 export const CATEGORY_EMOJI: Record<Category, string> = {
   praia: '🏖️',

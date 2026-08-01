@@ -1,6 +1,6 @@
 import type { Bank, Itinerary } from '../types'
 import { makeSeed, SEED_VERSION } from '../data/seed'
-import { POOL_COLOR, RESTAURANT_COLOR } from '../data/palette'
+import { POOL_COLOR, RESTAURANT_COLOR, WINE_COLOR } from '../data/palette'
 
 const STORAGE_KEY = 'roteiro-rio:v1'
 
@@ -26,6 +26,7 @@ export function saveItinerary(it: Itinerary): void {
 const DEFAULT_BANKS: Bank[] = [
   { id: 'pool', label: 'Banco de ideias', emoji: '💡', color: POOL_COLOR, stops: [] },
   { id: 'restaurants', label: 'Restaurantes', emoji: '🍽️', color: RESTAURANT_COLOR, stops: [] },
+  { id: 'wine', label: 'Vinho', emoji: '🍷', color: WINE_COLOR, stops: [] },
 ]
 
 /** Garante os campos mínimos e migra formatos antigos (pool -> banks). */
